@@ -52,7 +52,7 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
-# create the EC2 intsance
+# create the EC2 instance
 resource "aws_instance" "tfexample" {
   ami           = "ami-0ad99772"
   instance_type = "t2.micro"
