@@ -52,6 +52,19 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
+# create the EC2 instance
+resource "aws_instance" "tfexample" {
+  ami           = "ami-0ad99772"
+  instance_type = "t2.micro"
+
+  key_name        = "tfkey"
+  security_groups = ["allow_ssh", "allow_postgres"]
+
+  tags {
+    Name = "atssrv-tf-instance"
+  }
+}
+
 # create a security group that allows postgres traffic
 resource "aws_security_group" "allow_postgres" {
   name        = "allow_postgres"
@@ -77,17 +90,4 @@ resource "aws_db_instance" "postgres" {
   parameter_group_name = "default.postgres10"
   apply_immediately    = "true"
   publicly_accessible  = "true"
-}
-
-# create the EC2 instance
-resource "aws_instance" "tfexample" {
-  ami           = "ami-0ad99772"
-  instance_type = "t2.micro"
-
-  key_name        = "tfkey"
-  security_groups = ["allow_ssh", "allow_postgres"]
-
-  tags {
-    Name = "atssrv-tf-instance"
-  }
 }
