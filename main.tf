@@ -48,7 +48,7 @@ resource "aws_security_group" "allow_ssh" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["76.93.151.189/32"]
+    cidr_blocks = ["76.93.151.0/24"]
   }
 }
 
@@ -61,7 +61,7 @@ resource "aws_security_group" "allow_postgres" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["76.93.151.189/32"]
+    cidr_blocks = ["76.93.151.0/24"]
   }
 }
 
