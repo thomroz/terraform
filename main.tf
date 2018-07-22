@@ -52,13 +52,38 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
+# create a security group that allows postgres traffic
+resource "aws_security_group" "allow_postgres" {
+  name        = "allow_postgres"
+  description = "Allow postgres port"
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["76.93.151.189/32"]
+  }
+}
+
+resource "aws_db_instance" "postgres" {
+  allocated_storage    = 20
+  storage_type         = "gp2"
+  engine               = "postgres"
+  engine_version       = "10.4"
+  instance_class       = "db.t2.small"
+  name                 = "postgres_db"
+  username             = "thomas"
+  password             = "thomas123"
+  parameter_group_name = "default.postgres10"
+}
+
 # create the EC2 instance
 resource "aws_instance" "tfexample" {
   ami           = "ami-0ad99772"
   instance_type = "t2.micro"
 
   key_name        = "tfkey"
-  security_groups = ["allow_ssh"]
+  security_groups = ["allow_ssh", "allow_postgres"]
 
   tags {
     Name = "atssrv-tf-instance"
