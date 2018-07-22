@@ -70,11 +70,13 @@ resource "aws_db_instance" "postgres" {
   storage_type         = "gp2"
   engine               = "postgres"
   engine_version       = "10.4"
-  instance_class       = "db.t2.small"
-  name                 = "postgres_db"
+  instance_class       = "db.t2.micro"
+  name                 = "thomasdb"
   username             = "thomas"
   password             = "thomas123"
   parameter_group_name = "default.postgres10"
+  apply_immediately    = "true"
+  publicly_accessible  = "true"
 }
 
 # create the EC2 instance
