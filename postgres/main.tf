@@ -54,7 +54,7 @@ resource "aws_security_group" "allow_ssh" {
 
 # create the EC2 instance
 resource "aws_instance" "tfexample" {
-  ami           = "ami-a042f4d8"
+  ami           = "ami-03ff314b1a9dacaa5"
   instance_type = "t2.micro"
 
   key_name        = "tfkey"
