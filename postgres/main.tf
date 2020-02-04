@@ -90,4 +90,5 @@ resource "aws_db_instance" "postgres" {
   parameter_group_name = "default.postgres11"
   apply_immediately    = "true"
   publicly_accessible  = "true"
+  skip_final_snapshot  = "true"
 }
