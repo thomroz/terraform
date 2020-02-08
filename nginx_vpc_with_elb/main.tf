@@ -79,6 +79,14 @@ resource "aws_security_group" "nginx_public_sg" {
     protocol    = "tcp"
     cidr_blocks = ["76.93.151.189/32"]
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
 }
 
 resource "aws_security_group" "nginx_private_sg" {
@@ -105,6 +113,13 @@ resource "aws_security_group" "nginx_private_sg" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [aws_subnet.nginx_public_sn_az_a.cidr_block, aws_subnet.nginx_public_sn_az_b.cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -177,6 +192,11 @@ resource "aws_route_table" "nginx_private_rt_a" {
   }
 }
 
+resource "aws_route_table_association" "nginx_rt_assoc_private_a" {
+  subnet_id      = aws_subnet.nginx_private_sn_az_a.id
+  route_table_id = aws_route_table.nginx_private_rt_a.id
+}
+
 resource "aws_route_table" "nginx_private_rt_b" {
   vpc_id = aws_vpc.nginx_vpc.id
 
@@ -188,6 +208,11 @@ resource "aws_route_table" "nginx_private_rt_b" {
   tags = {
     Name = "nginx_private_rt_b"
   }
+}
+
+resource "aws_route_table_association" "nginx_rt_assoc_private_b" {
+  subnet_id      = aws_subnet.nginx_private_sn_az_b.id
+  route_table_id = aws_route_table.nginx_private_rt_b.id
 }
 
 resource "aws_key_pair" "nginx_keypair" {
@@ -220,6 +245,30 @@ resource "aws_instance" "nginx_public_instance_b" {
 
   tags = {
     Name = "nginx_public_instance_b"
+  }
+}
+
+resource "aws_instance" "nginx_private_instance_a" {
+  ami                    = "ami-00811c730f693d566"
+  instance_type          = "t2.micro"
+  key_name               = "nginx_key"
+  subnet_id              = aws_subnet.nginx_private_sn_az_a.id
+  vpc_security_group_ids = [aws_security_group.nginx_private_sg.id]
+
+  tags = {
+    Name = "nginx_private_instance_a"
+  }
+}
+
+resource "aws_instance" "nginx_private_instance_b" {
+  ami                    = "ami-00811c730f693d566"
+  instance_type          = "t2.micro"
+  key_name               = "nginx_key"
+  subnet_id              = aws_subnet.nginx_private_sn_az_b.id
+  vpc_security_group_ids = [aws_security_group.nginx_private_sg.id]
+
+  tags = {
+    Name = "nginx_private_instance_b"
   }
 }
 
