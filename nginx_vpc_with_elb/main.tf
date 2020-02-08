@@ -54,4 +54,60 @@ resource "aws_subnet" "nginx_private_sn_az_b" {
   }
 }
 
+resource "aws_security_group" "nginx_public_sg" {
+  name        = "nginx_public_sg"
+  description = "allow http, icmp, ssh"
+  vpc_id      = aws_vpc.nginx_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["76.93.151.189/32"]
+  }
+
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["76.93.151.189/32"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["76.93.151.189/32"]
+  }
+}
+
+resource "aws_security_group" "nginx_private_sg" {
+  name        = "nginx_private_sg"
+  description = "allow http, icmp, ssh"
+  vpc_id      = aws_vpc.nginx_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [aws_subnet.nginx_public_sn_az_a.cidr_block, aws_subnet.nginx_public_sn_az_b.cidr_block]
+  }
+
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = [aws_subnet.nginx_public_sn_az_a.cidr_block, aws_subnet.nginx_public_sn_az_b.cidr_block]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [aws_subnet.nginx_public_sn_az_a.cidr_block, aws_subnet.nginx_public_sn_az_b.cidr_block]
+  }
+}
+
+
+
 
