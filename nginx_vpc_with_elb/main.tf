@@ -5,7 +5,7 @@ provider "aws" {
 
 
 resource "aws_vpc" "nginx_vpc" {
-  cidr_block = "172.16.0.0/16"
+  cidr_block = var.nginx_vpc_cidr
 
   tags = {
     Name = "nginx_vpc"
@@ -14,7 +14,7 @@ resource "aws_vpc" "nginx_vpc" {
 
 resource "aws_subnet" "nginx_public_sn_az_a" {
   vpc_id                  = aws_vpc.nginx_vpc.id
-  cidr_block              = "172.16.1.0/24"
+  cidr_block              = var.nginx_public_sn_cidr_az_a
   availability_zone       = "us-west-2a"
   map_public_ip_on_launch = true
 
@@ -25,7 +25,7 @@ resource "aws_subnet" "nginx_public_sn_az_a" {
 
 resource "aws_subnet" "nginx_public_sn_az_b" {
   vpc_id                  = aws_vpc.nginx_vpc.id
-  cidr_block              = "172.16.2.0/24"
+  cidr_block              = var.nginx_public_sn_cidr_az_b
   availability_zone       = "us-west-2b"
   map_public_ip_on_launch = true
 
@@ -36,7 +36,7 @@ resource "aws_subnet" "nginx_public_sn_az_b" {
 
 resource "aws_subnet" "nginx_private_sn_az_a" {
   vpc_id            = aws_vpc.nginx_vpc.id
-  cidr_block        = "172.16.10.0/24"
+  cidr_block        = var.nginx_private_sn_cidr_az_a
   availability_zone = "us-west-2a"
 
   tags = {
@@ -46,7 +46,7 @@ resource "aws_subnet" "nginx_private_sn_az_a" {
 
 resource "aws_subnet" "nginx_private_sn_az_b" {
   vpc_id            = aws_vpc.nginx_vpc.id
-  cidr_block        = "172.16.20.0/24"
+  cidr_block        = var.nginx_private_sn_cidr_az_b
   availability_zone = "us-west-2b"
 
   tags = {
