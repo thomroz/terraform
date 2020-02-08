@@ -108,6 +108,40 @@ resource "aws_security_group" "nginx_private_sg" {
   }
 }
 
+resource "aws_internet_gateway" "nginx_public_gw" {
+  vpc_id = aws_vpc.nginx_vpc.id
+
+  tags = {
+    Name = "nginx_public_gw"
+  }
+}
+
+resource aws_eip "nginx_nat_gw_eip_a" {
+}
+
+resource aws_eip "nginx_nat_gw_eip_b" {
+}
+
+resource "aws_nat_gateway" "nginx_nat_gw_a" {
+  allocation_id = aws_eip.nginx_nat_gw_eip_a.id
+  subnet_id     = aws_subnet.nginx_public_sn_az_a.id
+
+  tags = {
+    Name = "nginx_nat_gw_a"
+  }
+}
+
+resource "aws_nat_gateway" "nginx_nat_gw_b" {
+  allocation_id = aws_eip.nginx_nat_gw_eip_b.id
+  subnet_id     = aws_subnet.nginx_public_sn_az_b.id
+
+  tags = {
+    Name = "nginx_nat_gw_b"
+  }
+}
+
+
+
 
 
 
