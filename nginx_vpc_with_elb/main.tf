@@ -140,6 +140,90 @@ resource "aws_nat_gateway" "nginx_nat_gw_b" {
   }
 }
 
+resource "aws_route_table" "nginx_public_rt" {
+  vpc_id = aws_vpc.nginx_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.nginx_public_gw.id
+  }
+
+  tags = {
+    Name = "nginx_public_rt"
+  }
+}
+
+resource "aws_route_table_association" "nginx_rt_assoc_public_a" {
+  subnet_id      = aws_subnet.nginx_public_sn_az_a.id
+  route_table_id = aws_route_table.nginx_public_rt.id
+}
+
+resource "aws_route_table_association" "nginx_rt_assoc_public_b" {
+  subnet_id      = aws_subnet.nginx_public_sn_az_b.id
+  route_table_id = aws_route_table.nginx_public_rt.id
+}
+
+
+resource "aws_route_table" "nginx_private_rt_a" {
+  vpc_id = aws_vpc.nginx_vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nginx_nat_gw_a.id
+  }
+
+  tags = {
+    Name = "nginx_private_rt_a"
+  }
+}
+
+resource "aws_route_table" "nginx_private_rt_b" {
+  vpc_id = aws_vpc.nginx_vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nginx_nat_gw_b.id
+  }
+
+  tags = {
+    Name = "nginx_private_rt_b"
+  }
+}
+
+resource "aws_key_pair" "nginx_keypair" {
+  key_name   = "nginx_key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjAj/bKBh7Kyb5e24kRuAmvKG0wIHZWC+aCXn7McDazIQfcHH0VDzg/te2B7r2JCwZysjq2PLvrJWxYJ2eL8DKIzTNedbVK5FlkQBwBSgvtfKYzqfKGCt83wJLPTkKOJp9ss6ocaPG4DRZmYoKTUTMVynhguuGJ6LtqAdzGbvCVpLj7tw49xbC3ybobANoHlv/4Y/vsh+VqA/2KBHhM/MVBzbX4kJ1nt3vwkLdB/QtrQcZtdsZ7Rs4WYwKyZeB/3JgOQnqn8RFXDzscFy06bpGSUuoYPu6r4f5TZVCN+ggu7smyysyAaFxuKnzT3flLYMrJJe5MimCYUZOAkubn83 thomas@macbookpro.local"
+
+  tags = {
+    Name = "nginx_keypair"
+  }
+}
+
+resource "aws_instance" "nginx_public_instance_a" {
+  ami                    = "ami-04590e7389a6e577c"
+  instance_type          = "t2.micro"
+  key_name               = "nginx_key"
+  subnet_id              = aws_subnet.nginx_public_sn_az_a.id
+  vpc_security_group_ids = [aws_security_group.nginx_public_sg.id]
+
+  tags = {
+    Name = "nginx_public_instance_a"
+  }
+}
+
+resource "aws_instance" "nginx_public_instance_b" {
+  ami                    = "ami-04590e7389a6e577c"
+  instance_type          = "t2.micro"
+  key_name               = "nginx_key"
+  subnet_id              = aws_subnet.nginx_public_sn_az_b.id
+  vpc_security_group_ids = [aws_security_group.nginx_public_sg.id]
+
+  tags = {
+    Name = "nginx_public_instance_b"
+  }
+}
+
+
 
 
 
