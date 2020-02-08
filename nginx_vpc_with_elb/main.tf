@@ -95,13 +95,6 @@ resource "aws_security_group" "nginx_private_sg" {
   vpc_id      = aws_vpc.nginx_vpc.id
 
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = [aws_subnet.nginx_public_sn_az_a.cidr_block, aws_subnet.nginx_public_sn_az_b.cidr_block]
-  }
-
-  ingress {
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
@@ -113,6 +106,13 @@ resource "aws_security_group" "nginx_private_sg" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [aws_subnet.nginx_public_sn_az_a.cidr_block, aws_subnet.nginx_public_sn_az_b.cidr_block]
+  }
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.nginx_public_sg.id]
   }
 
   egress {
@@ -272,7 +272,53 @@ resource "aws_instance" "nginx_private_instance_b" {
   }
 }
 
+resource aws_eip "nginx_app_lb" {
+}
 
+resource aws_lb "nginx-app-lb" {
+  name               = "nginx-app-lb"
+  internal           = false
+  load_balancer_type = "application"
+
+  security_groups = [aws_security_group.nginx_public_sg.id]
+  subnets         = [aws_subnet.nginx_public_sn_az_a.id, aws_subnet.nginx_public_sn_az_b.id]
+
+  enable_deletion_protection = false
+
+  tags = {
+    Name = "nginx-app-lb"
+  }
+}
+
+resource aws_lb_target_group "nginx-app-lb-tg" {
+  name     = "nginx-lb-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.nginx_vpc.id
+}
+
+resource aws_lb_target_group_attachment "nginx-app-lb-tf-attach-private-a" {
+  target_group_arn = aws_lb_target_group.nginx-app-lb-tg.arn
+  target_id        = aws_instance.nginx_private_instance_a.id
+  port             = 80
+}
+
+resource aws_lb_target_group_attachment "nginx-app-lb-tf-attach-private-b" {
+  target_group_arn = aws_lb_target_group.nginx-app-lb-tg.arn
+  target_id        = aws_instance.nginx_private_instance_b.id
+  port             = 80
+}
+
+resource aws_lb_listener nginx_lb_listener {
+  load_balancer_arn = aws_lb.nginx-app-lb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.nginx-app-lb-tg.arn
+  }
+}
 
 
 
