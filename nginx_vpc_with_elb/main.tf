@@ -249,7 +249,7 @@ resource "aws_instance" "nginx_public_instance_b" {
 }
 
 resource "aws_instance" "nginx_private_instance_a" {
-  ami                    = "ami-00811c730f693d566"
+  ami                    = "ami-0470e927d96ff02ea"
   instance_type          = "t2.micro"
   key_name               = "nginx_key"
   subnet_id              = aws_subnet.nginx_private_sn_az_a.id
@@ -261,7 +261,7 @@ resource "aws_instance" "nginx_private_instance_a" {
 }
 
 resource "aws_instance" "nginx_private_instance_b" {
-  ami                    = "ami-00811c730f693d566"
+  ami                    = "ami-0bea2c1179450942e"
   instance_type          = "t2.micro"
   key_name               = "nginx_key"
   subnet_id              = aws_subnet.nginx_private_sn_az_b.id
