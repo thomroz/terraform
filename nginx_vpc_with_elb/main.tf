@@ -272,9 +272,6 @@ resource "aws_instance" "nginx_private_instance_b" {
   }
 }
 
-resource aws_eip "nginx_app_lb" {
-}
-
 resource aws_lb "nginx-app-lb" {
   name               = "nginx-app-lb"
   internal           = false
