@@ -5,7 +5,7 @@ variable "nginx_ami_id" {
 
 variable "ingress_cidr_block" {
   type    = string
-  default = "76.93.0.0/16"
+  default = "0.0.0.0/0"
 }
 
 variable "nginx_vpc_cidr" {
