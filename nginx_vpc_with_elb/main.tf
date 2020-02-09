@@ -63,21 +63,21 @@ resource "aws_security_group" "nginx_public_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["76.93.151.189/32"]
+    cidr_blocks = [var.ingress_cidr_block]
   }
 
   ingress {
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
-    cidr_blocks = ["76.93.151.189/32"]
+    cidr_blocks = [var.ingress_cidr_block]
   }
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["76.93.151.189/32"]
+    cidr_blocks = [var.ingress_cidr_block]
   }
 
   egress {
@@ -224,7 +224,7 @@ resource "aws_key_pair" "nginx_keypair" {
 }
 
 resource "aws_instance" "nginx_public_instance_a" {
-  ami                    = "ami-04590e7389a6e577c"
+  ami                    = var.nginx_ami_id
   instance_type          = "t2.micro"
   key_name               = "nginx_key"
   subnet_id              = aws_subnet.nginx_public_sn_az_a.id
@@ -236,7 +236,7 @@ resource "aws_instance" "nginx_public_instance_a" {
 }
 
 resource "aws_instance" "nginx_public_instance_b" {
-  ami                    = "ami-04590e7389a6e577c"
+  ami                    = var.nginx_ami_id
   instance_type          = "t2.micro"
   key_name               = "nginx_key"
   subnet_id              = aws_subnet.nginx_public_sn_az_b.id
@@ -248,7 +248,7 @@ resource "aws_instance" "nginx_public_instance_b" {
 }
 
 resource "aws_instance" "nginx_private_instance_a" {
-  ami                    = "ami-0470e927d96ff02ea"
+  ami                    = var.nginx_ami_id
   instance_type          = "t2.micro"
   key_name               = "nginx_key"
   subnet_id              = aws_subnet.nginx_private_sn_az_a.id
@@ -260,7 +260,7 @@ resource "aws_instance" "nginx_private_instance_a" {
 }
 
 resource "aws_instance" "nginx_private_instance_b" {
-  ami                    = "ami-0bea2c1179450942e"
+  ami                    = var.nginx_ami_id
   instance_type          = "t2.micro"
   key_name               = "nginx_key"
   subnet_id              = aws_subnet.nginx_private_sn_az_b.id
