@@ -223,51 +223,43 @@ resource "aws_key_pair" "nginx_keypair" {
   }
 }
 
-resource "aws_instance" "nginx_public_instance_a" {
-  ami                    = var.nginx_ami_id
+resource "aws_launch_template" "nginx_launch_template_private" {
+  name_prefix            = "nginx"
+  image_id               = var.nginx_ami_id
   instance_type          = "t2.micro"
-  key_name               = "nginx_key"
-  subnet_id              = aws_subnet.nginx_public_sn_az_a.id
-  vpc_security_group_ids = [aws_security_group.nginx_public_sg.id]
-
-  tags = {
-    Name = "nginx_public_instance_a"
-  }
-}
-
-resource "aws_instance" "nginx_public_instance_b" {
-  ami                    = var.nginx_ami_id
-  instance_type          = "t2.micro"
-  key_name               = "nginx_key"
-  subnet_id              = aws_subnet.nginx_public_sn_az_b.id
-  vpc_security_group_ids = [aws_security_group.nginx_public_sg.id]
-
-  tags = {
-    Name = "nginx_public_instance_b"
-  }
-}
-
-resource "aws_instance" "nginx_private_instance_a" {
-  ami                    = var.nginx_ami_id
-  instance_type          = "t2.micro"
-  key_name               = "nginx_key"
-  subnet_id              = aws_subnet.nginx_private_sn_az_a.id
   vpc_security_group_ids = [aws_security_group.nginx_private_sg.id]
+}
 
-  tags = {
-    Name = "nginx_private_instance_a"
+resource "aws_autoscaling_group" "nginx_private_asg" {
+  min_size            = 1
+  max_size            = 2
+  desired_capacity    = 1
+  vpc_zone_identifier = [aws_subnet.nginx_private_sn_az_a.id, aws_subnet.nginx_private_sn_az_b.id]
+  target_group_arns   = [aws_lb_target_group.nginx-app-lb-tg.arn]
+
+  launch_template {
+    id      = aws_launch_template.nginx_launch_template_private.id
+    version = "$Latest"
   }
 }
 
-resource "aws_instance" "nginx_private_instance_b" {
-  ami                    = var.nginx_ami_id
+resource "aws_launch_template" "nginx_launch_template_public" {
+  name_prefix            = "nginx"
+  image_id               = var.nginx_ami_id
   instance_type          = "t2.micro"
-  key_name               = "nginx_key"
-  subnet_id              = aws_subnet.nginx_private_sn_az_b.id
-  vpc_security_group_ids = [aws_security_group.nginx_private_sg.id]
+  vpc_security_group_ids = [aws_security_group.nginx_public_sg.id]
+}
 
-  tags = {
-    Name = "nginx_private_instance_b"
+resource "aws_autoscaling_group" "nginx_public_asg" {
+  min_size            = 1
+  max_size            = 2
+  desired_capacity    = 1
+  vpc_zone_identifier = [aws_subnet.nginx_public_sn_az_a.id, aws_subnet.nginx_public_sn_az_b.id]
+  target_group_arns   = [aws_lb_target_group.nginx-app-lb-tg.arn]
+
+  launch_template {
+    id      = aws_launch_template.nginx_launch_template_public.id
+    version = "$Latest"
   }
 }
 
@@ -286,25 +278,6 @@ resource aws_lb "nginx-app-lb" {
   }
 }
 
-resource aws_lb_target_group "nginx-app-lb-tg" {
-  name     = "nginx-lb-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.nginx_vpc.id
-}
-
-resource aws_lb_target_group_attachment "nginx-app-lb-tf-attach-private-a" {
-  target_group_arn = aws_lb_target_group.nginx-app-lb-tg.arn
-  target_id        = aws_instance.nginx_private_instance_a.id
-  port             = 80
-}
-
-resource aws_lb_target_group_attachment "nginx-app-lb-tf-attach-private-b" {
-  target_group_arn = aws_lb_target_group.nginx-app-lb-tg.arn
-  target_id        = aws_instance.nginx_private_instance_b.id
-  port             = 80
-}
-
 resource aws_lb_listener nginx_lb_listener {
   load_balancer_arn = aws_lb.nginx-app-lb.arn
   port              = "80"
@@ -316,7 +289,11 @@ resource aws_lb_listener nginx_lb_listener {
   }
 }
 
-
-
+resource aws_lb_target_group "nginx-app-lb-tg" {
+  name     = "nginx-lb-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.nginx_vpc.id
+}
 
 
