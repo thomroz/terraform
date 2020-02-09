@@ -3,7 +3,6 @@ provider "aws" {
   region  = "us-west-2"
 }
 
-
 resource "aws_vpc" "nginx_vpc" {
   cidr_block = var.nginx_vpc_cidr
 
@@ -347,3 +346,25 @@ resource aws_lb_target_group "nginx-app-lb-tg" {
   vpc_id   = aws_vpc.nginx_vpc.id
 }
 
+resource "aws_sns_topic" "nginx_private_asg_topic" {
+  name = "nginx_private_asg_topic"
+}
+
+resource "aws_sns_topic_subscription" "nginx_private_asg_topic_subscription" {
+  topic_arn = aws_sns_topic.nginx_private_asg_topic.arn
+  protocol  = "sms"
+  endpoint  = var.nginx_asg_event_sms_recipient
+}
+
+resource "aws_autoscaling_notification" "example_notifications" {
+  group_names = [aws_autoscaling_group.nginx_private_asg.name, aws_autoscaling_group.nginx_public_asg.name]
+
+  notifications = [
+    "autoscaling:EC2_INSTANCE_LAUNCH",
+    "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+    "autoscaling:EC2_INSTANCE_TERMINATE",
+    "autoscaling:EC2_INSTANCE_TERMINATE_ERROR",
+  ]
+
+  topic_arn = aws_sns_topic.nginx_private_asg_topic.arn
+}
