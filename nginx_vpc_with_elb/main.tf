@@ -247,7 +247,7 @@ resource "aws_autoscaling_policy" "nginx_private_asg_scaling_policy_up" {
   name                   = "nginx_private_asg_scaling_policy_up"
   scaling_adjustment     = 1
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 90
+  cooldown               = 60
   autoscaling_group_name = aws_autoscaling_group.nginx_private_asg.name
 }
 
@@ -258,7 +258,7 @@ resource "aws_cloudwatch_metric_alarm" "nginx-private-asg-cpu-alarm-up" {
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = "120"
+  period              = "60"
   statistic           = "Average"
   threshold           = "33"
   dimensions = {
@@ -272,7 +272,7 @@ resource "aws_autoscaling_policy" "nginx_private_asg_scaling_policy_down" {
   name                   = "nginx_private_asg_scaling_policy_down"
   scaling_adjustment     = -1
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 90
+  cooldown               = 60
   autoscaling_group_name = aws_autoscaling_group.nginx_private_asg.name
 }
 
@@ -283,7 +283,7 @@ resource "aws_cloudwatch_metric_alarm" "nginx-private-asg-cpu-alarm-down" {
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = "120"
+  period              = "60"
   statistic           = "Average"
   threshold           = "5"
   dimensions = {
@@ -346,5 +346,4 @@ resource aws_lb_target_group "nginx-app-lb-tg" {
   protocol = "HTTP"
   vpc_id   = aws_vpc.nginx_vpc.id
 }
-
 
