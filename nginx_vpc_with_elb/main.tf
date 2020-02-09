@@ -86,7 +86,6 @@ resource "aws_security_group" "nginx_public_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
 }
 
 resource "aws_security_group" "nginx_private_sg" {
@@ -224,13 +223,14 @@ resource "aws_key_pair" "nginx_keypair" {
 }
 
 resource "aws_launch_template" "nginx_launch_template_private" {
-  name_prefix            = "nginx"
+  name_prefix            = "nginx_"
   image_id               = var.nginx_ami_id
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.nginx_private_sg.id]
 }
 
 resource "aws_autoscaling_group" "nginx_private_asg" {
+  name                = "nginx_private_asg"
   min_size            = 1
   max_size            = 2
   desired_capacity    = 1
@@ -243,6 +243,56 @@ resource "aws_autoscaling_group" "nginx_private_asg" {
   }
 }
 
+resource "aws_autoscaling_policy" "nginx_private_asg_scaling_policy_up" {
+  name                   = "nginx_private_asg_scaling_policy_up"
+  scaling_adjustment     = 1
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 90
+  autoscaling_group_name = aws_autoscaling_group.nginx_private_asg.name
+}
+
+resource "aws_cloudwatch_metric_alarm" "nginx-private-asg-cpu-alarm-up" {
+  alarm_name          = "nginx-private-asg-cpu-alarm-up"
+  alarm_description   = "nginx-private-asg-cpu-alarm-up"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "33"
+  dimensions = {
+    "AutoScalingGroupName" = aws_autoscaling_group.nginx_private_asg.name
+  }
+  actions_enabled = true
+  alarm_actions   = [aws_autoscaling_policy.nginx_private_asg_scaling_policy_up.arn]
+}
+
+resource "aws_autoscaling_policy" "nginx_private_asg_scaling_policy_down" {
+  name                   = "nginx_private_asg_scaling_policy_down"
+  scaling_adjustment     = -1
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 90
+  autoscaling_group_name = aws_autoscaling_group.nginx_private_asg.name
+}
+
+resource "aws_cloudwatch_metric_alarm" "nginx-private-asg-cpu-alarm-down" {
+  alarm_name          = "nginx-private-asg-cpu-alarm-down"
+  alarm_description   = "nginx-private-asg-cpu-alarm-down"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "5"
+  dimensions = {
+    "AutoScalingGroupName" = aws_autoscaling_group.nginx_private_asg.name
+  }
+  actions_enabled = true
+  alarm_actions   = [aws_autoscaling_policy.nginx_private_asg_scaling_policy_down.arn]
+}
+
 resource "aws_launch_template" "nginx_launch_template_public" {
   name_prefix            = "nginx"
   image_id               = var.nginx_ami_id
@@ -251,9 +301,10 @@ resource "aws_launch_template" "nginx_launch_template_public" {
 }
 
 resource "aws_autoscaling_group" "nginx_public_asg" {
-  min_size            = 1
+  name                = "nginx_public_asg"
+  min_size            = 2
   max_size            = 2
-  desired_capacity    = 1
+  desired_capacity    = 2
   vpc_zone_identifier = [aws_subnet.nginx_public_sn_az_a.id, aws_subnet.nginx_public_sn_az_b.id]
   target_group_arns   = [aws_lb_target_group.nginx-app-lb-tg.arn]
 
