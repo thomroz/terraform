@@ -178,7 +178,6 @@ resource "aws_route_table_association" "nginx_rt_assoc_public_b" {
   route_table_id = aws_route_table.nginx_public_rt.id
 }
 
-
 resource "aws_route_table" "nginx_private_rt_a" {
   vpc_id = aws_vpc.nginx_vpc.id
 
@@ -217,7 +216,7 @@ resource "aws_route_table_association" "nginx_rt_assoc_private_b" {
 
 resource "aws_key_pair" "nginx_keypair" {
   key_name   = "nginx_key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjAj/bKBh7Kyb5e24kRuAmvKG0wIHZWC+aCXn7McDazIQfcHH0VDzg/te2B7r2JCwZysjq2PLvrJWxYJ2eL8DKIzTNedbVK5FlkQBwBSgvtfKYzqfKGCt83wJLPTkKOJp9ss6ocaPG4DRZmYoKTUTMVynhguuGJ6LtqAdzGbvCVpLj7tw49xbC3ybobANoHlv/4Y/vsh+VqA/2KBHhM/MVBzbX4kJ1nt3vwkLdB/QtrQcZtdsZ7Rs4WYwKyZeB/3JgOQnqn8RFXDzscFy06bpGSUuoYPu6r4f5TZVCN+ggu7smyysyAaFxuKnzT3flLYMrJJe5MimCYUZOAkubn83 thomas@macbookpro.local"
+  public_key = var.nginx_public_key
 
   tags = {
     Name = "nginx_keypair"
