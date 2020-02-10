@@ -357,7 +357,7 @@ resource "aws_sns_topic_subscription" "nginx_private_asg_topic_subscription" {
 }
 
 resource "aws_autoscaling_notification" "example_notifications" {
-  group_names = [aws_autoscaling_group.nginx_private_asg.name, aws_autoscaling_group.nginx_public_asg.name]
+  group_names = [aws_autoscaling_group.nginx_private_asg.name]
 
   notifications = [
     "autoscaling:EC2_INSTANCE_LAUNCH",
