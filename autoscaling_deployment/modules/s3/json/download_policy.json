@@ -1,0 +1,17 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "s3:Get*",
+                "s3:List*"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::thomas-terraform-codedeploybucket/*",
+            "Principal": {
+                "AWS": [
+                    "arn:aws:iam::786121737481:role/CodeDeploy-EC2-Instance-Profile"
+                ]
+            }
+        }
+    ]
+}
